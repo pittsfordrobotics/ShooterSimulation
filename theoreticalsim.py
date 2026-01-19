@@ -2,15 +2,19 @@ import math
 import numpy as np
 
 H = 1.84
-MAXTHETA = 70
+MAXTHETA = 80
 G = 9.81
+HUB_W = 1.059942
 
 def getX(theta, v):
-    s = math.sin(theta)
-    c = math.cos(theta)
+    c = math.sin(theta)
+    s = math.cos(theta)
     if ((c**2 * v**2) - (2*G*H)) <= 0:
+        # print("nah")
         return -1
+    # print("it worked")
     return ((s*v)*(math.sqrt((c**2 * v**2) - (2*G*H)) + c*v))/G
+    # return (v**2 * math.sin(2*theta))/G
 
 def calculateV(theta, r):
     a = r / math.cos(theta)
@@ -65,12 +69,27 @@ def getSimulatedSDx(r, sd_t, sd_v, n = 30):
     for i in range(n):
         theta_experimental = np.random.normal(theta_expected, sd_t)
         v_experimental = np.random.normal(v_expected, sd_v)
-        res_x.append(r - getX(theta_experimental, v_experimental))
+        theta_experimental = math.radians(theta_experimental)
+        # print(getX(theta_experimental, v_experimental))
+        x = getX(theta_experimental, v_experimental)
+        if (x == -1):
+            res_x.append(-1)
+            continue
+        res_x.append(r - x)
 
-    return float(np.std(res_x))
+    hit = 0
+    for x in res_x:
+        if (x == -1): continue
+        if (abs(x) > (HUB_W/2)): continue
+        hit += 1
+
+    return [float(np.std(res_x)), (hit/n)]
 
 if __name__ == "__main__":
-    r = float(input("enter distance from target (m): "))
+    r = float(input("enter distance from center of hub (m): "))
+    if (r <= (HUB_W/2)):
+        print("buddy ur in the hub")
+        exit()
     # h = input("enter target height")
     # if h == "":
     #     h = 1.84 # meters
@@ -81,5 +100,6 @@ if __name__ == "__main__":
     sd_t = float(input("enter standard deviation of theta: "))
     sd_v = float(input("enter standard deviation of v: "))
     sim = getSimulatedSDx(r, sd_t, sd_v)
-    print("simulated sd of landing location: " + str(sim))
-    print("                           = " + str((sim/1.059942)*100) + "% of hub, goal ~20%")
+    print("simulated sd of landing location: " + str(sim[0]))
+    print("simulated accuracy: " + str(sim[1]*100) + "%")
+    print("                           = " + str((sim[0]/HUB_W)*100) + "% of hub, goal ~20%")
