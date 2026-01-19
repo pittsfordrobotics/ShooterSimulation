@@ -101,5 +101,6 @@ if __name__ == "__main__":
     sd_v = float(input("enter standard deviation of v: "))
     sim = getSimulatedSDx(r, sd_t, sd_v)
     print("simulated sd of landing location: " + str(sim[0]))
+    print("                                = " + str((sim[0]/HUB_W)*100) + "% of hub, goal ~20%")
     print("simulated accuracy: " + str(sim[1]*100) + "%")
-    print("                           = " + str((sim[0]/HUB_W)*100) + "% of hub, goal ~20%")
+    
