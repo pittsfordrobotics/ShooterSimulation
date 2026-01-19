@@ -73,7 +73,6 @@ def getSimulatedSDx(r, sd_t, sd_v, n = 30):
         # print(getX(theta_experimental, v_experimental))
         x = getX(theta_experimental, v_experimental)
         if (x == -1):
-            res_x.append(-1)
             continue
         res_x.append(r - x)
 
@@ -83,7 +82,7 @@ def getSimulatedSDx(r, sd_t, sd_v, n = 30):
         if (abs(x) > (HUB_W/2)): continue
         hit += 1
 
-    return [float(np.std(res_x)), (hit/n)]
+    return [float(np.std(res_x)), (hit/len(res_x))]
 
 if __name__ == "__main__":
     r = float(input("enter distance from center of hub (m): "))
@@ -99,7 +98,10 @@ if __name__ == "__main__":
     print(getIdeal(r))
     sd_t = float(input("enter standard deviation of theta: "))
     sd_v = float(input("enter standard deviation of v: "))
-    sim = getSimulatedSDx(r, sd_t, sd_v)
+    n = int(input("simualtion size (default n = 30): "))
+    if n == "":
+        n = 30
+    sim = getSimulatedSDx(r, sd_t, sd_v, n)
     print("simulated sd of landing location: " + str(sim[0]))
     print("                                = " + str((sim[0]/HUB_W)*100) + "% of hub, goal ~20%")
     print("simulated accuracy: " + str(sim[1]*100) + "%")
